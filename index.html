@@ -2,10 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control - Gestión de Ascensores</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; padding: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; padding: 20px; }
         .container { max-width: 900px; margin: auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
         .tab-btn { padding: 10px 20px; cursor: pointer; background: #e2e8f0; border: none; border-radius: 5px 5px 0 0; font-weight: bold; }
@@ -73,7 +74,6 @@
         casos.push(nuevoCaso);
         localStorage.setItem('casos', JSON.stringify(casos));
         
-        // Limpiar campos
         document.getElementById('edificio').value = "";
         document.getElementById('tecnico').value = "";
         
