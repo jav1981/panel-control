@@ -2,85 +2,34 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - Ascensores (Inclusivo)</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Panel de Control - Ascensores</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header-panel { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 10px; }
-        h1, h2, h3 { color: #0f172a; display: flex; align-items: center; gap: 10px; margin-top: 10px; }
-        .btn-login { background-color: #475569; color: white; border: none; padding: 10px 16px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 13px; }
-        .btn-login.admin-activo { background-color: #2b5c8f; }
-        .solo-supervisor { display: none !important; }
-        body.modo-admin .solo-supervisor { display: block !important; }
-        body.modo-admin table .solo-supervisor, body.modo-admin tr .solo-supervisor, body.modo-admin td .solo-supervisor { display: table-cell !important; }
-        .contenedor-pestanas { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 3px solid #1e293b; padding-bottom: 10px; }
-        .btn-pestana { padding: 12px 24px; font-size: 15px; font-weight: bold; cursor: pointer; background-color: #e2e8f0; border: 1px solid #cbd5e1; border-radius: 6px 6px 0 0; color: #475569; }
-        .btn-pestana.activa { background-color: #1e293b; color: white; border-color: #1e293b; }
-        .contenido-pestana { display: none; } .contenido-pestana.activa { display: block; }
-        .formularios-gestion { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .form-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid #2b5c8f; }
-        .form-card.tecnicos { border-top-color: #009e73; }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 8px; font-weight: 700; color: #0f172a; }
-        input, select, textarea { width: 100%; padding: 10px; border: 2px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; }
-        .btn-primary { background-color: #009e73; } .btn-secondary { background-color: #2b5c8f; }
-        .seccion-tabla { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 2px solid #f1f5f9; }
-        .badge { padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; color: white; }
-        .bg-detenido { background-color: #2b5c8f; } .bg-compleja { background-color: #e69f00; color: #000; } .bg-programada { background-color: #009e73; }
-        .canvas-container { position: relative; margin: auto; height: 300px; width: 100%; }
+        body { font-family: sans-serif; padding: 20px; }
+        .solo-admin { display: none; }
+        .visible { display: block !important; }
+        .boton-clave { background: #333; color: white; padding: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header-panel">
-        <h1>⚙️ Centro de Mando - Gestión de Ascensores</h1>
-        <button id="btn-modo" class="btn-login" onclick="toggleModoAdmin()">🔑 Acceso Supervisor</button>
+    <h1>Centro de Mando</h1>
+    <button class="boton-clave" onclick="acceder()">🔑 Acceso Supervisor</button>
+    
+    <div id="area-admin" class="solo-admin">
+        <h3>📝 Registrar nuevo caso</h3>
+        <input type="text" id="input-caso" placeholder="Nombre Edificio">
+        <button onclick="guardar()">Guardar Caso</button>
     </div>
-    <div class="contenedor-pestanas">
-        <button id="pestana-registro-btn" class="btn-pestana solo-supervisor" onclick="cambiarPestana('ingreso')">📝 Ingreso</button>
-        <button class="btn-pestana activa" onclick="cambiarPestana('monitoreo')">📊 Monitoreo</button>
-        <button class="btn-pestana" onclick="cambiarPestana('graficos')">📈 Gráficos</button>
-    </div>
-    <div id="pestana-ingreso" class="contenido-pestana">
-        <div class="formularios-gestion solo-supervisor">
-            <div class="form-card">
-                <h3>📝 Registrar Caso</h3>
-                <div class="form-group"><label>Código:</label><input type="text" id="eq-codigo"></div>
-                <div class="form-group"><label>Edificio:</label><input type="text" id="eq-nombre" readonly></div>
-                <button class="btn btn-secondary" onclick="registrarCaso()">Registrar</button>
-            </div>
-        </div>
-    </div>
-    <div id="pestana-monitoreo" class="contenido-pestana activa">
-        <div class="seccion-tabla">
-            <table><thead><tr><th>Código</th><th>Tipo</th><th>Acción</th></tr></thead><tbody id="tabla-casos-activos"></tbody></table>
-        </div>
-    </div>
-    <div id="pestana-graficos" class="contenido-pestana">
-        <div class="card-grafico"><canvas id="graficoMes"></canvas></div>
-    </div>
-</div>
-<script>
-    function toggleModoAdmin() {
-        const esAdmin = localStorage.getItem('es_supervisor') === 'si';
-        if (esAdmin) {
-            localStorage.setItem('es_supervisor', 'no');
-            location.reload();
-        } else {
+
+    <script>
+        function acceder() {
             const clave = prompt("Introduce tu clave:");
             if (clave === "motita1236") {
-                localStorage.setItem('es_supervisor', 'si');
-                location.reload();
-            } else { alert("Clave incorrecta"); }
+                document.getElementById('area-admin').classList.add('visible');
+                alert("¡Bienvenido Supervisor!");
+            } else {
+                alert("Clave incorrecta");
+            }
         }
-    }
-    // Carga de seguridad inicial
-    if(localStorage.getItem('es_supervisor') === 'si') document.body.classList.add('modo-admin');
-</script>
+    </script>
 </body>
 </html>
