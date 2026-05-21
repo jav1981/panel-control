@@ -5,16 +5,16 @@
     <title>Panel de Control - Ascensores</title>
     <style>
         body { font-family: sans-serif; padding: 20px; }
-        .solo-admin { display: none; }
-        .visible { display: block !important; }
-        .boton-clave { background: #333; color: white; padding: 10px; cursor: pointer; }
+        /* Esto oculta el formulario al inicio */
+        #area-admin { display: none; } 
+        .boton-clave { background: #333; color: white; padding: 10px; cursor: pointer; border: none; border-radius: 5px;}
     </style>
 </head>
 <body>
     <h1>Centro de Mando</h1>
     <button class="boton-clave" onclick="acceder()">🔑 Acceso Supervisor</button>
     
-    <div id="area-admin" class="solo-admin">
+    <div id="area-admin">
         <h3>📝 Registrar nuevo caso</h3>
         <input type="text" id="input-caso" placeholder="Nombre Edificio">
         <button onclick="guardar()">Guardar Caso</button>
@@ -24,11 +24,15 @@
         function acceder() {
             const clave = prompt("Introduce tu clave:");
             if (clave === "motita1236") {
-                document.getElementById('area-admin').classList.add('visible');
+                // Al poner la clave, cambiamos el estilo de 'none' a 'block'
+                document.getElementById('area-admin').style.display = 'block';
                 alert("¡Bienvenido Supervisor!");
             } else {
                 alert("Clave incorrecta");
             }
+        }
+        function guardar() {
+            alert("Caso guardado: " + document.getElementById('input-caso').value);
         }
     </script>
 </body>
