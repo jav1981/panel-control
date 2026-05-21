@@ -2,40 +2,94 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel de Control</title>
+    <title>Panel de Control - Ascensores</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
-        .contenedor { background: white; padding: 20px; border-radius: 8px; max-width: 500px; margin: auto; }
+        body { font-family: sans-serif; background-color: #f8fafc; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        .btn-admin { background: #475569; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; }
+        .tabs { display: flex; gap: 10px; margin-top: 20px; border-bottom: 2px solid #ddd; }
+        .tab-btn { padding: 10px 20px; cursor: pointer; background: #e2e8f0; border: none; border-radius: 5px 5px 0 0; }
+        .tab-btn.active { background: #2b5c8f; color: white; }
+        .content { display: none; padding: 20px 0; }
+        .content.active { display: block; }
+        .admin-only { display: none; }
         input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #2b5c8f; color: white; border: none; cursor: pointer; }
+        button.save { width: 100%; padding: 10px; background: #009e73; color: white; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="contenedor">
-        <h1>Centro de Mando</h1>
-        
-        <h3>📝 Registrar Edificio</h3>
-        <input type="text" id="nombreEdificio" placeholder="Nombre del edificio">
-        <button onclick="guardarDato()">Guardar Caso</button>
-
-        <h3>📋 Casos Guardados</h3>
-        <ul id="listaCasos"></ul>
+<div class="container">
+    <div class="header">
+        <h1>⚙️ Centro de Mando</h1>
+        <button class="btn-admin" onclick="toggleAdmin()">🔑 Acceso Supervisor</button>
     </div>
 
-    <script>
-        // Esta función guarda el nombre en el navegador
-        function guardarDato() {
-            let input = document.getElementById("nombreEdificio");
-            let lista = document.getElementById("listaCasos");
-            
-            if (input.value.trim() !== "") {
-                let li = document.createElement("li");
-                li.textContent = input.value;
-                lista.appendChild(li);
-                input.value = ""; // Limpia el campo
-            }
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('monitoreo', this)">📊 Monitoreo</button>
+        <button class="tab-btn" onclick="showTab('ingreso', this)">📝 Ingreso</button>
+        <button class="tab-btn" onclick="showTab('graficos', this)">📈 Gráficos</button>
+    </div>
+
+    <div id="monitoreo" class="content active">
+        <h3>📋 Casos Activos</h3>
+        <ul id="lista-casos"></ul>
+    </div>
+
+    <div id="ingreso" class="content admin-only">
+        <h3>📝 Registrar Nuevo Caso</h3>
+        <input type="text" id="edificio" placeholder="Nombre del edificio">
+        <button class="save" onclick="guardar()">Registrar</button>
+    </div>
+
+    <div id="graficos" class="content">
+        <p>Aquí se mostrarán los gráficos de actividad.</p>
+    </div>
+</div>
+
+<script>
+    // Sistema de Pestañas
+    function showTab(id, btn) {
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // Sistema de Supervisor
+    function toggleAdmin() {
+        const adminArea = document.getElementById('ingreso');
+        if (adminArea.style.display === "block") {
+            adminArea.style.display = "none";
+            alert("Modo Supervisor Desactivado");
+        } else {
+            const clave = prompt("Introduce tu clave:");
+            if (clave === "motita1236") {
+                adminArea.style.display = "block";
+            } else { alert("Clave incorrecta"); }
         }
-    </script>
+    }
+
+    // Guardado
+    function guardar() {
+        const nombre = document.getElementById('edificio').value;
+        if(!nombre) return;
+        let casos = JSON.parse(localStorage.getItem('casos')) || [];
+        casos.push(nombre);
+        localStorage.setItem('casos', JSON.stringify(casos));
+        document.getElementById('edificio').value = "";
+        cargarLista();
+    }
+
+    function cargarLista() {
+        const lista = document.getElementById('lista-casos');
+        lista.innerHTML = "";
+        const casos = JSON.parse(localStorage.getItem('casos')) || [];
+        casos.forEach(c => lista.innerHTML += `<li>${c}</li>`);
+    }
+    
+    document.addEventListener('DOMContentLoaded', cargarLista);
+</script>
 </body>
 </html>
