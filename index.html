@@ -6,91 +6,94 @@
     <title>Panel de Control - Gestión de Ascensores</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
-        .tab-btn { padding: 10px 20px; cursor: pointer; background: #e2e8f0; border: none; border-radius: 5px 5px 0 0; font-weight: bold; }
-        .tab-btn.active { background: #2b5c8f; color: white; }
-        .content { display: none; }
-        .content.active { display: block; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 5px; box-sizing: border-box; }
-        button.save { width: 100%; padding: 12px; background: #009e73; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #0f172a; }
+        .contenedor-pestanas { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 3px solid #1e293b; padding-bottom: 10px; }
+        .btn-pestana { padding: 12px 24px; font-weight: bold; cursor: pointer; background-color: #e2e8f0; border: none; border-radius: 6px 6px 0 0; }
+        .btn-pestana.activa { background-color: #1e293b; color: white; }
+        .contenido-pestana { display: none; }
+        .contenido-pestana.activa { display: block; }
+        .form-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 2px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; background-color: #2b5c8f; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; border: 1px solid #e2e8f0; text-align: left; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>⚙️ Panel de Control - Gestión de Ascensores</h1>
-    
-    <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('ingreso', this)">📝 Ingreso de Casos</button>
-        <button class="tab-btn" onclick="showTab('monitoreo', this)">📊 Monitoreo</button>
-        <button class="tab-btn" onclick="showTab('graficos', this)">📈 Gráficos</button>
+    <h1>⚙️ Centro de Mando - Gestión de Ascensores</h1>
+
+    <div class="contenedor-pestanas">
+        <button class="btn-pestana activa" onclick="cambiarPestana('ingreso', this)">📝 Ingreso y Asignación</button>
+        <button class="btn-pestana" onclick="cambiarPestana('monitoreo', this)">📊 Monitoreo</button>
+        <button class="btn-pestana" onclick="cambiarPestana('graficos', this)">📈 Gráficos</button>
     </div>
 
-    <div id="ingreso" class="content active">
-        <h3>Registrar Caso de Ascensor</h3>
-        <input type="text" id="edificio" placeholder="Código Edificio (Ej: M1408)">
-        <input type="text" id="tecnico" placeholder="Nombre/Iniciales Técnico">
-        <select id="tipoCaso">
-            <option value="Emergencia">Equipo Detenido (Emergencia)</option>
-            <option value="Mantencion">Mantención Programada</option>
-        </select>
-        <button class="save" onclick="guardarCaso()">Registrar Caso</button>
+    <div id="pestana-ingreso" class="contenido-pestana activa">
+        <div class="form-card">
+            <h3>Registrar Caso</h3>
+            <label>Código Edificio:</label>
+            <input type="text" id="eq-codigo">
+            <label>Nombre Edificio (Escribe aquí):</label>
+            <input type="text" id="eq-nombre">
+            <label>Tipo de Caso:</label>
+            <select id="eq-tipo">
+                <option value="⚠️ Equipo Detenido">⚠️ Equipo Detenido</option>
+                <option value="🔧 Falla Compleja">🔧 Falla Compleja</option>
+                <option value="📅 Mantención">📅 Mantención</option>
+            </select>
+            <button class="btn" onclick="registrarCaso()">Registrar</button>
+        </div>
     </div>
 
-    <div id="monitoreo" class="content">
-        <h3>📋 Casos Activos</h3>
-        <table>
-            <thead><tr><th>Edificio</th><th>Técnico</th><th>Tipo</th></tr></thead>
-            <tbody id="tabla-casos"></tbody>
-        </table>
+    <div id="pestana-monitoreo" class="contenido-pestana">
+        <div class="form-card">
+            <h3>Casos Activos</h3>
+            <table id="tabla-casos">
+                <thead><tr><th>Código</th><th>Edificio</th><th>Tipo</th></tr></thead>
+                <tbody id="lista-casos"></tbody>
+            </table>
+        </div>
     </div>
 
-    <div id="graficos" class="content">
-        <h3>📈 Resumen de Carga de Técnicos</h3>
-        <canvas id="graficoCarga" width="400" height="150"></canvas>
+    <div id="pestana-graficos" class="contenido-pestana">
+        <div class="form-card">
+            <canvas id="graficoMes" height="100"></canvas>
+        </div>
     </div>
 </div>
 
 <script>
-    function showTab(id, btn) {
-        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        btn.classList.add('active');
+    let casos = JSON.parse(localStorage.getItem('casos')) || [];
+
+    function cambiarPestana(id, btn) {
+        document.querySelectorAll('.contenido-pestana').forEach(el => el.classList.remove('activa'));
+        document.querySelectorAll('.btn-pestana').forEach(el => el.classList.remove('activa'));
+        document.getElementById('pestana-' + id).classList.add('activa');
+        btn.classList.add('activa');
     }
 
-    function guardarCaso() {
-        const nuevoCaso = {
-            edificio: document.getElementById('edificio').value,
-            tecnico: document.getElementById('tecnico').value,
-            tipo: document.getElementById('tipoCaso').value
+    function registrarCaso() {
+        const nuevo = {
+            codigo: document.getElementById('eq-codigo').value,
+            nombre: document.getElementById('eq-nombre').value,
+            tipo: document.getElementById('eq-tipo').value
         };
-        
-        let casos = JSON.parse(localStorage.getItem('casos')) || [];
-        casos.push(nuevoCaso);
+        casos.push(nuevo);
         localStorage.setItem('casos', JSON.stringify(casos));
-        
-        document.getElementById('edificio').value = "";
-        document.getElementById('tecnico').value = "";
-        
-        alert("Caso registrado correctamente");
-        cargarDatos();
+        renderizar();
+        alert("Registrado");
     }
 
-    function cargarDatos() {
-        const tabla = document.getElementById('tabla-casos');
-        tabla.innerHTML = "";
-        const casos = JSON.parse(localStorage.getItem('casos')) || [];
-        casos.forEach(c => {
-            tabla.innerHTML += `<tr><td>${c.edificio}</td><td>${c.tecnico}</td><td>${c.tipo}</td></tr>`;
-        });
+    function renderizar() {
+        const lista = document.getElementById('lista-casos');
+        lista.innerHTML = casos.map(c => `<tr><td>${c.codigo}</td><td>${c.nombre}</td><td>${c.tipo}</td></tr>`).join('');
     }
-    
-    document.addEventListener('DOMContentLoaded', cargarDatos);
+
+    renderizar();
 </script>
 </body>
 </html>
