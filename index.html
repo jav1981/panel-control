@@ -2,62 +2,39 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Control de Ascensores</title>
+    <title>Panel de Control</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; max-width: 600px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        input { width: 70%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { padding: 10px; cursor: pointer; background: #2b5c8f; color: white; border: none; border-radius: 4px; }
-        ul { list-style: none; padding: 0; margin-top: 20px; }
-        li { background: white; padding: 12px; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; border-left: 5px solid #2b5c8f; }
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
+        .contenedor { background: white; padding: 20px; border-radius: 8px; max-width: 500px; margin: auto; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #2b5c8f; color: white; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1>Control de Ascensores</h1>
+    <div class="contenedor">
+        <h1>Centro de Mando</h1>
+        
         <h3>📝 Registrar Edificio</h3>
-        <input type="text" id="edificio" placeholder="Nombre del Edificio">
-        <button onclick="guardar()">Guardar</button>
+        <input type="text" id="nombreEdificio" placeholder="Nombre del edificio">
+        <button onclick="guardarDato()">Guardar Caso</button>
+
+        <h3>📋 Casos Guardados</h3>
+        <ul id="listaCasos"></ul>
     </div>
 
-    <h3>📋 Casos Activos</h3>
-    <ul id="lista-casos"></ul>
-
     <script>
-        // Cargar los datos nada más al abrir la página
-        document.addEventListener('DOMContentLoaded', cargarDatos);
-
-        function guardar() {
-            const input = document.getElementById('edificio');
-            const nombre = input.value;
-            if(!nombre) return;
+        // Esta función guarda el nombre en el navegador
+        function guardarDato() {
+            let input = document.getElementById("nombreEdificio");
+            let lista = document.getElementById("listaCasos");
             
-            // Obtener lista actual o crear una nueva
-            let casos = JSON.parse(localStorage.getItem('casos')) || [];
-            casos.push(nombre);
-            
-            // Guardar en el navegador
-            localStorage.setItem('casos', JSON.stringify(casos));
-            
-            input.value = ""; // Limpiar caja
-            cargarDatos(); // Refrescar la lista
-        }
-
-        function cargarDatos() {
-            const lista = document.getElementById('lista-casos');
-            lista.innerHTML = "";
-            const casos = JSON.parse(localStorage.getItem('casos')) || [];
-            casos.forEach((c, index) => {
-                lista.innerHTML += `<li>${c} <button onclick="borrar(${index})">❌</button></li>`;
-            });
-        }
-
-        function borrar(index) {
-            let casos = JSON.parse(localStorage.getItem('casos'));
-            casos.splice(index, 1);
-            localStorage.setItem('casos', JSON.stringify(casos));
-            cargarDatos();
+            if (input.value.trim() !== "") {
+                let li = document.createElement("li");
+                li.textContent = input.value;
+                lista.appendChild(li);
+                input.value = ""; // Limpia el campo
+            }
         }
     </script>
 </body>
