@@ -6,7 +6,7 @@
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f4f4f9; max-width: 600px; margin: auto; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        input { width: 70%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        input { width: 70%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         button { padding: 10px; cursor: pointer; background: #2b5c8f; color: white; border: none; border-radius: 4px; }
         ul { list-style: none; padding: 0; margin-top: 20px; }
         li { background: white; padding: 12px; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; border-left: 5px solid #2b5c8f; }
@@ -25,18 +25,23 @@
     <ul id="lista-casos"></ul>
 
     <script>
-        // Cargar datos al abrir
+        // Cargar los datos nada más al abrir la página
         document.addEventListener('DOMContentLoaded', cargarDatos);
 
         function guardar() {
-            const nombre = document.getElementById('edificio').value;
+            const input = document.getElementById('edificio');
+            const nombre = input.value;
             if(!nombre) return;
             
+            // Obtener lista actual o crear una nueva
             let casos = JSON.parse(localStorage.getItem('casos')) || [];
             casos.push(nombre);
+            
+            // Guardar en el navegador
             localStorage.setItem('casos', JSON.stringify(casos));
-            document.getElementById('edificio').value = "";
-            cargarDatos();
+            
+            input.value = ""; // Limpiar caja
+            cargarDatos(); // Refrescar la lista
         }
 
         function cargarDatos() {
