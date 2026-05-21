@@ -2,37 +2,64 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel de Control - Ascensores</title>
+    <title>Control de Ascensores</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        /* Esto oculta el formulario al inicio */
-        #area-admin { display: none; } 
-        .boton-clave { background: #333; color: white; padding: 10px; cursor: pointer; border: none; border-radius: 5px;}
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
+        .admin-area { display: none; background: white; padding: 15px; border-radius: 8px; margin-top: 10px; }
+        .visible { display: block; }
+        ul { list-style: none; padding: 0; }
+        li { background: white; padding: 10px; margin-bottom: 5px; border-left: 5px solid #2b5c8f; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
-    <h1>Centro de Mando</h1>
-    <button class="boton-clave" onclick="acceder()">🔑 Acceso Supervisor</button>
-    
-    <div id="area-admin">
-        <h3>📝 Registrar nuevo caso</h3>
-        <input type="text" id="input-caso" placeholder="Nombre Edificio">
-        <button onclick="guardar()">Guardar Caso</button>
+    <h1>Control de Ascensores</h1>
+    <button onclick="acceder()">🔑 Acceso Supervisor</button>
+
+    <div id="admin-area" class="admin-area">
+        <h3>📝 Registrar Edificio</h3>
+        <input type="text" id="edificio" placeholder="Nombre Edificio">
+        <button onclick="guardar()">Guardar</button>
     </div>
 
+    <h3>📋 Casos Activos</h3>
+    <ul id="lista-casos"></ul>
+
     <script>
+        // Cargar datos al abrir
+        document.addEventListener('DOMContentLoaded', cargarDatos);
+
         function acceder() {
             const clave = prompt("Introduce tu clave:");
             if (clave === "motita1236") {
-                // Al poner la clave, cambiamos el estilo de 'none' a 'block'
-                document.getElementById('area-admin').style.display = 'block';
-                alert("¡Bienvenido Supervisor!");
-            } else {
-                alert("Clave incorrecta");
-            }
+                document.getElementById('admin-area').classList.add('visible');
+            } else { alert("Clave incorrecta"); }
         }
+
         function guardar() {
-            alert("Caso guardado: " + document.getElementById('input-caso').value);
+            const nombre = document.getElementById('edificio').value;
+            if(!nombre) return;
+            
+            let casos = JSON.parse(localStorage.getItem('casos')) || [];
+            casos.push(nombre);
+            localStorage.setItem('casos', JSON.stringify(casos));
+            document.getElementById('edificio').value = "";
+            cargarDatos();
+        }
+
+        function cargarDatos() {
+            const lista = document.getElementById('lista-casos');
+            lista.innerHTML = "";
+            const casos = JSON.parse(localStorage.getItem('casos')) || [];
+            casos.forEach((c, index) => {
+                lista.innerHTML += `<li>${c} <button onclick="borrar(${index})">❌</button></li>`;
+            });
+        }
+
+        function borrar(index) {
+            let casos = JSON.parse(localStorage.getItem('casos'));
+            casos.splice(index, 1);
+            localStorage.setItem('casos', JSON.stringify(casos));
+            cargarDatos();
         }
     </script>
 </body>
