@@ -12,10 +12,9 @@
         .tab-btn.active { background: #2b5c8f; color: white; }
         .content { display: none; }
         .content.active { display: block; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 5px; box-sizing: border-box; }
         button.save { width: 100%; padding: 12px; background: #009e73; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 12px; border: 1px solid #e2e8f0; text-align: left; }
     </style>
 </head>
@@ -31,18 +30,14 @@
     </div>
 
     <div id="ingreso" class="content active">
-        <div class="form-grid">
-            <div>
-                <h3>Registrar Caso</h3>
-                <input type="text" id="edificio" placeholder="Código Edificio (Ej: M1408)">
-                <input type="text" id="tecnico" placeholder="Nombre/Iniciales Técnico">
-                <select id="tipoCaso">
-                    <option value="Emergencia">Equipo Detenido (Emergencia)</option>
-                    <option value="Mantencion">Mantención Programada</option>
-                </select>
-                <button class="save" onclick="guardarCaso()">Registrar Caso</button>
-            </div>
-        </div>
+        <h3>Registrar Caso de Ascensor</h3>
+        <input type="text" id="edificio" placeholder="Código Edificio (Ej: M1408)">
+        <input type="text" id="tecnico" placeholder="Nombre/Iniciales Técnico">
+        <select id="tipoCaso">
+            <option value="Emergencia">Equipo Detenido (Emergencia)</option>
+            <option value="Mantencion">Mantención Programada</option>
+        </select>
+        <button class="save" onclick="guardarCaso()">Registrar Caso</button>
     </div>
 
     <div id="monitoreo" class="content">
@@ -54,8 +49,8 @@
     </div>
 
     <div id="graficos" class="content">
-        <h3>📈 Carga de Trabajo</h3>
-        <canvas id="miGrafico" width="400" height="150"></canvas>
+        <h3>📈 Resumen de Carga de Técnicos</h3>
+        <canvas id="graficoCarga" width="400" height="150"></canvas>
     </div>
 </div>
 
@@ -73,10 +68,16 @@
             tecnico: document.getElementById('tecnico').value,
             tipo: document.getElementById('tipoCaso').value
         };
+        
         let casos = JSON.parse(localStorage.getItem('casos')) || [];
         casos.push(nuevoCaso);
         localStorage.setItem('casos', JSON.stringify(casos));
-        alert("Caso registrado con éxito");
+        
+        // Limpiar campos
+        document.getElementById('edificio').value = "";
+        document.getElementById('tecnico').value = "";
+        
+        alert("Caso registrado correctamente");
         cargarDatos();
     }
 
