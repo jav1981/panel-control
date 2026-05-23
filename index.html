@@ -3,97 +3,785 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - Gestión de Ascensores</title>
+    <title>Panel de Control - Ascensores</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { color: #0f172a; }
-        .contenedor-pestanas { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 3px solid #1e293b; padding-bottom: 10px; }
-        .btn-pestana { padding: 12px 24px; font-weight: bold; cursor: pointer; background-color: #e2e8f0; border: none; border-radius: 6px 6px 0 0; }
-        .btn-pestana.activa { background-color: #1e293b; color: white; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        h1, h2, h3 {
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* --- BOTÓN DE CONTROL DE ACCESO --- */
+        .btn-acceso {
+            background-color: #475569;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .btn-acceso.logeado {
+            background-color: #dc2626;
+        }
+
+        /* --- PESTAÑAS --- */
+        .contenedor-pestanas {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #1e293b;
+            padding-bottom: 10px;
+        }
+
+        .btn-pestana {
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px 6px 0 0;
+            color: #475569;
+            transition: all 0.2s ease;
+        }
+
+        .btn-pestana:hover { background-color: #cbd5e1; }
+
+        .btn-pestana.activa {
+            background-color: #1e293b;
+            color: white;
+            border-color: #1e293b;
+        }
+
         .contenido-pestana { display: none; }
         .contenido-pestana.activa { display: block; }
-        .form-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 2px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; background-color: #2b5c8f; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+
+        /* --- FORMULARIOS --- */
+        .formularios-gestion {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .formularios-gestion { grid-template-columns: 1fr; }
+        }
+
+        .form-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-top: 5px solid #2b5c8f; /* Cobalto */
+        }
+
+        .form-card.tecnicos { border-top-color: #009e73; } /* Verde Azulado */
+        .form-group { margin-bottom: 18px; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+            background-color: #fdfdfd;
+        }
+
+        input[type="text"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #1e293b;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+        }
+        .btn-primary { background-color: #009e73; } /* Calipso/Verde Seguro */
+        .btn-secondary { background-color: #2b5c8f; } /* Cobalto */
+
+        /* --- SECCIÓN SEMANA Y CRONOGRAMA --- */
+        .agenda-semanal {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-top: 5px solid #475569;
+            margin-top: 25px;
+        }
+
+        .cuadros-dias {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .cuadros-dias { grid-template-columns: 1fr; }
+        }
+
+        .dia-columna {
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            min-height: 150px;
+        }
+
+        .dia-titulo {
+            font-weight: bold;
+            color: #0f172a;
+            border-bottom: 2px solid #cbd5e1;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 14px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            padding: 6px 0;
+            line-height: 1.4;
+        }
+
+        .tarjeta-mini {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 4px solid #009e73;
+            border: 1px solid #cbd5e1;
+            border-left-width: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .badge-iniciales {
+            background: #1e293b;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .badge-iniciales.apoyo {
+            background: #333333;
+            border: 2px dashed #ffffff;
+        }
+
+        .btn-borrar-mini {
+            background: none;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* --- TABLAS Y MONITOREO --- */
+        .seccion-tabla {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        th { background-color: #f1f5f9; color: #0f172a; font-weight: 700; }
+
+        .badge {
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        .bg-detenido { background-color: #2b5c8f; }     /* Cobalto */
+        .bg-compleja { background-color: #e69f00; color: #000; } /* Amarillo Ocre */
+        .bg-programada { background-color: #009e73; }   /* Calipso */
+
+        .btn-action {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            background-color: #1e293b;
+        }
+
+        /* --- SECCIÓN GRÁFICOS --- */
+        .panel-graficos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .panel-graficos { grid-template-columns: 1fr; }
+        }
+        .card-grafico {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .canvas-container {
+            position: relative;
+            margin: auto;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* --- MENSAJE DE BLOQUEO --- */
+        .bloqueo-mensaje {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-top: 20px;
+            border: 2px dashed #cbd5e1;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>⚙️ Centro de Mando - Gestión de Ascensores</h1>
+    <div class="header-panel">
+        <h1>⚙️ Centro de Mando - Gestión de Ascensores</h1>
+        <button id="btn-acceso-seguro" class="btn-acceso" onclick="toggleAcceso()">🔒 Modo: Técnico (Lectura)</button>
+    </div>
 
     <div class="contenedor-pestanas">
-        <button class="btn-pestana activa" onclick="cambiarPestana('ingreso', this)">📝 Ingreso y Asignación</button>
-        <button class="btn-pestana" onclick="cambiarPestana('monitoreo', this)">📊 Monitoreo</button>
-        <button class="btn-pestana" onclick="cambiarPestana('graficos', this)">📈 Gráficos</button>
+        <button id="tab-ingreso" class="btn-pestana activa" onclick="cambiarPestana('ingreso')">📝 Ingreso de información y asignación</button>
+        <button id="tab-monitoreo" class="btn-pestana" onclick="cambiarPestana('monitoreo')">📊 Carga de trabajo diario</button>
+        <button id="tab-graficos" class="btn-pestana" onclick="cambiarPestana('graficos')">📈 Gráficos Estadísticos</button>
     </div>
 
     <div id="pestana-ingreso" class="contenido-pestana activa">
-        <div class="form-card">
-            <h3>Registrar Caso</h3>
-            <label>Código Edificio:</label>
-            <input type="text" id="eq-codigo">
-            <label>Nombre Edificio (Escribe aquí):</label>
-            <input type="text" id="eq-nombre">
-            <label>Tipo de Caso:</label>
-            <select id="eq-tipo">
-                <option value="⚠️ Equipo Detenido">⚠️ Equipo Detenido</option>
-                <option value="🔧 Falla Compleja">🔧 Falla Compleja</option>
-                <option value="📅 Mantención">📅 Mantención</option>
-            </select>
-            <button class="btn" onclick="registrarCaso()">Registrar</button>
+        <div id="contenido-ingreso-protegido" style="display: none;">
+            <div class="formularios-gestion">
+                <div class="form-card">
+                    <h3>📝 Registrar Caso de Ascensor</h3>
+                    <div class="form-group">
+                        <label for="eq-codigo">Código Edificio (Ej: M3, M21):</label>
+                        <input type="text" id="eq-codigo" placeholder="Ej: M3">
+                    </div>
+                    <div class="form-group">
+                        <label for="eq-nombre">Nombre Edificio:</label>
+                        <input type="text" id="eq-nombre" placeholder="Escribe el nombre del edificio manualmente">
+                    </div>
+                    <div class="form-group">
+                        <label for="eq-tipo">Tipo de Caso:</label>
+                        <select id="eq-tipo">
+                            <option value="⚠️ Equipo Detenido">⚠️ Equipo Detenido (Emergencia)</option>
+                            <option value="🔧 Falla Compleja">🔧 Falla Compleja</option>
+                            <option value="📅 Mantención Programada">📅 Mantención Programada</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eq-numero">Número de Ascensor / Piso:</label>
+                        <input type="text" id="eq-numero" placeholder="Ej: Ascensor 2">
+                    </div>
+                    <div class="form-group">
+                        <label for="eq-falla">Detalle de la Falla / Requerimiento:</label>
+                        <textarea id="eq-falla" rows="2" placeholder="Ej: Falla en operador de puertas"></textarea>
+                    </div>
+                    <button class="btn btn-secondary" onclick="registrarCaso()">Registrar Caso</button>
+                </div>
+
+                <div class="form-card tecnicos">
+                    <h3>📅 Asignar Tarea a Técnico</h3>
+                    <div class="form-group">
+                        <label for="tec-iniciales">Seleccionar Técnico:</label>
+                        <select id="tec-iniciales">
+                            <option value="" disabled selected>-- Selecciona un técnico --</option>
+                            <option value="RF">Rene Fuentes (RF)</option>
+                            <option value="AG">Alejandro Grunewaldt (AG)</option>
+                            <option value="CD">Carlos Duran (CD)</option>
+                            <option value="JP">Josue Pinto (JP)</option>
+                            <option value="JF">Juan Fuentes (JF)</option>
+                            <option value="RB">Rodrigo Bascuñan (RB)</option>
+                            <option value="SA">Simón Artiaga (SA)</option>
+                            <option value="FM">Felipe Medina (FM)</option>
+                            <option value="FMa">Fernando Maldonado (FMa)</option>
+                            <option value="BN">Benjamín Nahuelñir (BN)</option>
+                            <option value="APOYO">⚠️ Apoyo de otra Área</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tec-codigo">Código Edificio (Ej: M3):</label>
+                        <input type="text" id="tec-codigo" placeholder="Código Edificio">
+                    </div>
+                    <div class="form-group">
+                        <label for="tec-dia">Día de la Semana:</label>
+                        <select id="tec-dia">
+                            <option value="Lunes">Lunes</option>
+                            <option value="Martes">Martes</option>
+                            <option value="Miércoles">Miércoles</option>
+                            <option value="Jueves">Jueves</option>
+                            <option value="Viernes">Viernes</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="asignarTecnicoSemana()">Asignar a la Semana</button>
+                </div>
+            </div>
+        </div>
+        <div id="bloqueo-ingreso" class="bloqueo-mensaje">
+            <h2>🔒 Acceso Restringido</h2>
+            <p>Debes activar el modo <b>Supervisor</b> arriba a la derecha para añadir casos o modificar asignaciones.</p>
         </div>
     </div>
 
     <div id="pestana-monitoreo" class="contenido-pestana">
-        <div class="form-card">
-            <h3>Casos Activos</h3>
-            <table id="tabla-casos">
-                <thead><tr><th>Código</th><th>Edificio</th><th>Tipo</th></tr></thead>
-                <tbody id="lista-casos"></tbody>
+        <div class="seccion-tabla">
+            <h2>🛠️ Monitoreo de Casos Activos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Edificio</th>
+                        <th>Tipo Caso</th>
+                        <th>Ubicación/N°</th>
+                        <th>Detalle Falla</th>
+                        <th>Técnicos Asignados</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-casos-activos"></tbody>
+            </table>
+        </div>
+
+        <div class="agenda-semanal">
+            <h2>📅 Planificación de Técnicos en la Semana Actual</h2>
+            <div class="cuadros-dias">
+                <div class="dia-columna" id="col-Lunes"><div class="dia-titulo" id="tit-Lunes">Lunes</div><div id="tareas-Lunes"></div></div>
+                <div class="dia-columna" id="col-Martes"><div class="dia-titulo" id="tit-Martes">Martes</div><div id="tareas-Martes"></div></div>
+                <div class="dia-columna" id="col-Miércoles"><div class="dia-titulo" id="tit-Miércoles">Miércoles</div><div id="tareas-Miércoles"></div></div>
+                <div class="dia-columna" id="col-Jueves"><div class="dia-titulo" id="tit-Jueves">Jueves</div><div id="tareas-Jueves"></div></div>
+                <div class="dia-columna" id="col-Viernes"><div class="dia-titulo" id="tit-Viernes">Viernes</div><div id="tareas-Viernes"></div></div>
+            </div>
+        </div>
+
+        <div class="seccion-tabla" style="margin-top: 25px;">
+            <h2>📜 Historial de Trabajos Realizados</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha Cierre</th>
+                        <th>Código</th>
+                        <th>Edificio / Cliente</th>
+                        <th>Tipo Caso</th>
+                        <th>Detalle Resuelto</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-historial"></tbody>
             </table>
         </div>
     </div>
 
     <div id="pestana-graficos" class="contenido-pestana">
-        <div class="form-card">
-            <canvas id="graficoMes" height="100"></canvas>
+        <div class="panel-graficos">
+            <div class="card-grafico">
+                <h3>👷 Carga de Trabajo de la Semana (Por Técnico)</h3>
+                <p style="color:#475569; font-size:13px;">Cantidad de edificios asignados en la agenda actual</p>
+                <div class="canvas-container">
+                    <canvas id="graficoTecnicos"></canvas>
+                </div>
+            </div>
+            <div class="card-grafico">
+                <h3>📊 Distribución de Casos (Mes en Curso)</h3>
+                <p style="color:#475569; font-size:13px;">Total acumulado de fallas registradas este mes</p>
+                <div class="canvas-container">
+                    <canvas id="graficoMes"></canvas>
+                </div>
+            </div>
         </div>
     </div>
+
 </div>
 
 <script>
-    let casos = JSON.parse(localStorage.getItem('casos')) || [];
+    // --- CONFIGURACIÓN DE SEGURIDAD ---
+    const CLAVE_SUPERVISOR = "Motita1236"; 
+    let esSupervisor = false;
 
-    function cambiarPestana(id, btn) {
+    let equiposDetenidos = JSON.parse(localStorage.getItem('equipos_asensores')) || [];
+    let asignacionesSemana = JSON.parse(localStorage.getItem('asignaciones_tecnicos')) || [];
+    let historialEquipos = JSON.parse(localStorage.getItem('historial_ascensores')) || [];
+
+    let chartTecnicos = null;
+    let chartMes = null;
+
+    function toggleAcceso() {
+        if (!esSupervisor) {
+            let intento = prompt("Ingresa la contraseña de Supervisor para desbloquear las modificaciones:");
+            if (intento === CLAVE_SUPERVISOR) {
+                esSupervisor = true;
+                actualizarInterfazSeguridad();
+                alert("¡Modo Supervisor Activado exitosamente!");
+            } else if (intento !== null) {
+                alert("Contraseña incorrecta. Acceso denegado.");
+            }
+        } else {
+            esSupervisor = false;
+            actualizarInterfazSeguridad();
+            cambiarPestana('ingreso'); 
+            alert("Sesión de supervisor cerrada. Volviendo a modo lectura.");
+        }
+    }
+
+    function actualizarInterfazSeguridad() {
+        const botonSeguridad = document.getElementById('btn-acceso-seguro');
+        const contIngreso = document.getElementById('contenido-ingreso-protegido');
+        const bloqIngreso = document.getElementById('bloqueo-ingreso');
+
+        if (esSupervisor) {
+            botonSeguridad.innerHTML = "🔓 Supervisor (Cerrar Sesión)";
+            botonSeguridad.classList.add('logeado');
+            contIngreso.style.display = "block";
+            bloqIngreso.style.display = "none";
+        } else {
+            botonSeguridad.innerHTML = "🔒 Modo: Técnico (Lectura)";
+            botonSeguridad.classList.remove('logeado');
+            contIngreso.style.display = "none";
+            bloqIngreso.style.display = "block";
+        }
+        
+        // Al cambiar de estado, se redibujan las tablas y agendas para ocultar/mostrar botones
+        renderizarEquipos();
+        renderizarAsignacionesSemana();
+    }
+
+    function cambiarPestana(idPestana) {
         document.querySelectorAll('.contenido-pestana').forEach(el => el.classList.remove('activa'));
         document.querySelectorAll('.btn-pestana').forEach(el => el.classList.remove('activa'));
-        document.getElementById('pestana-' + id).classList.add('activa');
-        btn.classList.add('activa');
+
+        document.getElementById('pestana-' + idPestana).classList.add('activa');
+        
+        if(idPestana === 'ingreso') document.getElementById('tab-ingreso').classList.add('activa');
+        if(idPestana === 'monitoreo') document.getElementById('tab-monitoreo').classList.add('activa');
+        if(idPestana === 'graficos') document.getElementById('tab-graficos').classList.add('activa');
+
+        if(idPestana === 'graficos') {
+            renderizarGraficos();
+        }
     }
+
+    function calcularFechasSemana() {
+        const ahora = new Date();
+        const diaActual = ahora.getDay();
+        const distanciaAlLunes = diaActual === 0 ? -6 : 1 - diaActual;
+        
+        const lunesInical = new Date(ahora);
+        lunesInical.setDate(ahora.getDate() + distanciaAlLunes);
+
+        const diasNombre = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+        const mesesNombre = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+        diasNombre.forEach((dia, index) => {
+            const fechaDia = new Date(lunesInical);
+            fechaDia.setDate(lunesInical.getDate() + index);
+            
+            const numeroDia = fechaDia.getDate();
+            const nombreMes = mesesNombre[fechaDia.getMonth()];
+
+            const tituloContenedor = document.getElementById('tit-' + dia);
+            if (tituloContenedor) {
+                tituloContenedor.innerHTML = `${dia}<br><small style="font-weight:700; color:#475569;">${numeroDia} de ${nombreMes}</small>`;
+            }
+        });
+    }
+
+    window.onload = function() {
+        calcularFechasSemana();
+        actualizarInterfazSeguridad(); 
+    };
 
     function registrarCaso() {
-        const nuevo = {
-            codigo: document.getElementById('eq-codigo').value,
-            nombre: document.getElementById('eq-nombre').value,
-            tipo: document.getElementById('eq-tipo').value
+        if (!esSupervisor) return;
+        const codigo = document.getElementById('eq-codigo').value.trim().toUpperCase();
+        const nombre = document.getElementById('eq-nombre').value.trim();
+        const tipo = document.getElementById('eq-tipo').value;
+        const numero = document.getElementById('eq-numero').value.trim();
+        const falla = document.getElementById('eq-falla').value.trim();
+
+        if (!codigo || !nombre) {
+            alert("Por favor, rellena los campos requeridos.");
+            return;
+        }
+
+        const nuevoCaso = {
+            id: Date.now(),
+            codigo: codigo,
+            edificio: nombre,
+            tipo: tipo,
+            numero: numero,
+            falla: falla,
+            tecnicos: [],
+            mesAnio: new Date().toLocaleString('es-ES', { month: 'long', year: 'numeric' })
         };
-        casos.push(nuevo);
-        localStorage.setItem('casos', JSON.stringify(casos));
-        renderizar();
-        alert("Registrado");
+
+        equiposDetenidos.push(nuevoCaso);
+        localStorage.setItem('equipos_asensores', JSON.stringify(equiposDetenidos));
+        
+        document.getElementById('eq-codigo').value = "";
+        document.getElementById('eq-nombre').value = "";
+        document.getElementById('eq-numero').value = "";
+        document.getElementById('eq-falla').value = "";
+
+        renderizarEquipos();
+        alert("¡Caso guardado en la lista activa!");
     }
 
-    function renderizar() {
-        const lista = document.getElementById('lista-casos');
-        lista.innerHTML = casos.map(c => `<tr><td>${c.codigo}</td><td>${c.nombre}</td><td>${c.tipo}</td></tr>`).join('');
+    function obtenerClaseBadge(tipo) {
+        if(tipo.includes('⚠️')) return 'bg-detenido';
+        if(tipo.includes('🔧')) return 'bg-compleja';
+        return 'bg-programada';
     }
 
-    renderizar();
+    function renderizarEquipos() {
+        const tbody = document.getElementById('tabla-casos-activos');
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        equiposDetenidos.forEach(eq => {
+            const claseColor = obtenerClaseBadge(eq.tipo);
+            const tr = document.createElement('tr');
+            
+            // Si es supervisor, muestra el botón 'Terminado', si no, queda oculto o vacío
+            const celdaAccion = esSupervisor 
+                ? `<td><button class="btn-action" onclick="cerrarCaso(${eq.id})">✔ Terminado</button></td>`
+                : `<td><span style="color:#64748b; font-size:12px;">🔒 Solo Lectura</span></td>`;
+
+            tr.innerHTML = `
+                <td><span class="badge bg-detenido">${eq.codigo}</span></td>
+                <td><strong>${eq.edificio}</strong></td>
+                <td><span class="badge ${claseColor}">${eq.tipo}</span></td>
+                <td>${eq.numero || 'N/A'}</td>
+                <td>${eq.falla || 'Sin detalle'}</td>
+                <td>${eq.tecnicos.map(t => `<span class="badge-iniciales ${t==='APOYO'?'apoyo':''}">${t}</span>`).join(' ') || '<i>Sin asignar</i>'}</td>
+                ${celdaAccion}
+            `;
+            tbody.appendChild(tr);
+        });
+        renderizarHistorial();
+    }
+
+    function cerrarCaso(id) {
+        if (!esSupervisor) return;
+        const index = equiposDetenidos.findIndex(e => e.id === id);
+        if (index > -1) {
+            const casoResuelto = equiposDetenidos.splice(index, 1)[0];
+            casoResuelto.fechaCierre = new Date().toLocaleDateString();
+            historialEquipos.push(casoResuelto);
+            localStorage.setItem('equipos_asensores', JSON.stringify(equiposDetenidos));
+            localStorage.setItem('historial_ascensores', JSON.stringify(historialEquipos));
+            renderizarEquipos();
+        }
+    }
+
+    function renderizarHistorial() {
+        const tbody = document.getElementById('tabla-historial');
+        if (!tbody) return;
+        tbody.innerHTML = "";
+        historialEquipos.forEach(h => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${h.fechaCierre}</td>
+                <td><span class="badge" style="background-color:#475569;">${h.codigo}</span></td>
+                <td>${h.edificio}</td>
+                <td>${h.tipo}</td>
+                <td>${h.falla || 'Reparado con éxito'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function asignarTecnicoSemana() {
+        if (!esSupervisor) return;
+        const selectTecnico = document.getElementById('tec-iniciales');
+        const iniciales = selectTecnico.value;
+        const codigo = document.getElementById('tec-codigo').value.trim().toUpperCase();
+        const dia = document.getElementById('tec-dia').value;
+
+        if (!iniciales || !codigo) {
+            alert("Por favor, selecciona el técnico y escribe el código del edificio.");
+            return;
+        }
+
+        const casoActivo = equiposDetenidos.find(e => e.codigo === codigo);
+        if (casoActivo && !casoActivo.tecnicos.includes(iniciales)) {
+            casoActivo.tecnicos.push(iniciales);
+            localStorage.setItem('equipos_asensores', JSON.stringify(equiposDetenidos));
+            renderizarEquipos();
+        }
+
+        const nuevaAsignacion = { id: Date.now(), tecnico: iniciales, codigo: codigo, dia: dia };
+        asignacionesSemana.push(nuevaAsignacion);
+        localStorage.setItem('asignaciones_tecnicos', JSON.stringify(asignacionesSemana));
+
+        selectTecnico.value = "";
+        document.getElementById('tec-codigo').value = "";
+
+        renderizarAsignacionesSemana();
+        alert(`¡Asignado! Técnico programado con éxito.`);
+    }
+
+    function renderizarAsignacionesSemana() {
+        const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+        dias.forEach(d => {
+            const contenedor = document.getElementById('tareas-' + d);
+            if (contenedor) contenedor.innerHTML = "";
+        });
+
+        asignacionesSemana.forEach(asig => {
+            const contenedorDia = document.getElementById('tareas-' + asig.dia);
+            if (contenedorDia) {
+                const div = document.createElement('div');
+                div.className = "tarjeta-mini";
+                
+                const botonBorrar = esSupervisor 
+                    ? `<button class="btn-borrar-mini" onclick="borrarAsignacion(${asig.id})">✕</button>`
+                    : ``; // Si no es supervisor, no existe el botón X en el código HTML
+
+                div.innerHTML = `
+                    <div><span class="badge-iniciales ${asig.tecnico==='APOYO'?'apoyo':''}">${asig.tecnico}</span> → <strong>${asig.codigo}</strong></div>
+                    ${botonBorrar}
+                `;
+                contenedorDia.appendChild(div);
+            }
+        });
+    }
+
+    function borrarAsignacion(id) {
+        if (!esSupervisor) return;
+        asignacionesSemana = asignacionesSemana.filter(a => a.id !== id);
+        localStorage.setItem('asignaciones_tecnicos', JSON.stringify(asignacionesSemana));
+        renderizarAsignacionesSemana();
+    }
+
+    function renderizarGraficos() {
+        if(chartTecnicos) chartTecnicos.destroy();
+        if(chartMes) chartMes.destroy();
+
+        let conteoTecnicos = { "RF":0, "AG":0, "CD":0, "JP":0, "JF":0, "RB":0, "SA":0, "FM":0, "FMa":0, "BN":0, "APOYO":0 };
+        asignacionesSemana.forEach(a => {
+            if(conteoTecnicos[a.tecnico] !== undefined) conteoTecnicos[a.tecnico]++;
+        });
+
+        const ctxTec = document.getElementById('graficoTecnicos').getContext('2d');
+        chartTecnicos = new Chart(ctxTec, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(conteoTecnicos),
+                datasets: [{
+                    label: 'Edificios Asignados',
+                    data: Object.values(conteoTecnicos),
+                    backgroundColor: '#56b4e9',
+                    borderColor: '#1d4ed8',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+
+        let conteoTipos = { "⚠️ Equipo Detenido": 0, "🔧 Falla Compleja": 0, "📅 Mantención Programada": 0 };
+
+        equiposDetenidos.forEach(e => {
+            let tipoLimpio = e.tipo.split('(')[0].trim();
+            if(conteoTipos[tipoLimpio] !== undefined) conteoTipos[tipoLimpio]++;
+        });
+
+        historialEquipos.forEach(h => {
+            let tipoLimpio = h.tipo.split('(')[0].trim();
+            if(conteoTipos[tipoLimpio] !== undefined) conteoTipos[tipoLimpio]++;
+        });
+
+        const ctxMes = document.getElementById('graficoMes').getContext('2d');
+        chartMes = new Chart(ctxMes, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(conteoTipos),
+                datasets: [{
+                    data: Object.values(conteoTipos),
+                    backgroundColor: ['#2b5c8f', '#e69f00', '#009e73'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 20, font: { weight: 'bold' } } } }
+            }
+        });
+    }
 </script>
 </body>
 </html>
