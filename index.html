@@ -238,6 +238,7 @@
 
         fetch(urlPowerAutomate, {
             method: "POST",
+            mode: "no-cors", // Evita bloqueos de seguridad del navegador
             headers: {
                 "Content-Type": "application/json"
             },
@@ -250,12 +251,8 @@
                 tecnicos: "Sin asignar"
             })
         })
-        .then(response => {
-            if (response.ok) {
-                console.log("¡Sincronizado con SharePoint de manera exitosa!");
-            } else {
-                console.error("Error en la respuesta del servidor de automatización.");
-            }
+        .then(() => {
+            console.log("Solicitud enviada a Power Automate.");
         })
         .catch(error => console.error("Error de red o conectividad:", error));
         // ------------------------------------------
